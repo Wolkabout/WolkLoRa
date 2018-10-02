@@ -1,6 +1,6 @@
 # Intro
 --------
-WolkNode-TTN repo consists Arduino IDE example which makes connection to [The Things Network](https://www.thethingsnetwork.org/). It's based on [RN2483-Arduino-Library](https://github.com/jpmeijers/RN2483-Arduino-Library).
+WolkTTN repo consists Arduino IDE example which makes connection to [The Things Network](https://www.thethingsnetwork.org/). It's based on [RN2483-Arduino-Library](https://github.com/jpmeijers/RN2483-Arduino-Library).
 Device measure enviroment temperature data on hearbeat event. This data can be routed from TTN to [WolkAbout IoT Platform](https://demo.wolkabout.com/#/login) using apropiated decoder(below described as [Application Decoder](#decoder)) and WolkAbout IoT Platform wizard.
 
 # Prerequest
