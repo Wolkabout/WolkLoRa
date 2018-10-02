@@ -10,23 +10,24 @@
  */
 #include <rn2xx3.h>
 #include <SoftwareSerial.h>
+#include <CayenneLPP.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
 #define debugSerial Serial
 
-#define OTAA                     //DEFINE CONNECTION MODE: ABP or OTAA
-#define HEARTBEAT 60000          //in ms
+#define ABP                     //DEFINE CONNECTION MODE: ABP or OTAA
+#define HEARTBEAT 25000          //in ms
 #define BYTES_TO_SEND 3
 #define ONE_WIRE_BUS 2
 
 #ifdef OTAA                      // Copy from TTN Console/Device Overview your AppEUI and AppKey for OTAA mode
-const char *appEui = "70B3D57ED00096A0";
-const char *appKey = "DB3CB2B8D77C8114C2247090E2C9AEAD";
+const char *appEui = "";
+const char *appKey = "";
 #else //ABP                      // Copy from TTN Console/Device Overview your DevAddr, NwkSKey and AppSKey for ABP mode
-const char *devAddr = "260114E1";
-const char *nwkSKey = "8B452ACA0135B180CFC18ADAE8E06B51";
-const char *appSKey = "93BC936B1B2B5E8A351B3F6D62B56ED4";
+const char *devAddr = "";
+const char *nwkSKey = "";
+const char *appSKey = "";
 #endif
 bool join_result = false;
 
@@ -34,6 +35,8 @@ SoftwareSerial mySerial(10, 11); // RX, TX
 rn2xx3 myLora(mySerial);
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
+
+CayenneLPP lpp(6);
 
 
 void setup(){
@@ -59,13 +62,12 @@ void loop(){
   int temperature_high = temperature;
   int temperature_low = 100 * (temperature - temperature_high);
 
-  byte payload[3];
-  payload[0] = 0x01;
-  payload[1] = lowByte(temperature_high);
-  payload[2] = lowByte(temperature_low);
+  debugSerial.print(" Formating to CayenneLPP");
+  lpp.reset();
+  lpp.addTemperature(1, temperature);
 
   debugSerial.print(" Sending payload to TTN ");
-  join_result = myLora.tx(payload);
+  join_result = myLora.tx(lpp.getBuffer());
   if(!join_result){
     debugSerial.print("Failed to transmit to readings. \n\r Status is:");
     debugSerial.print(join_result);
@@ -84,13 +86,11 @@ void loop(){
 }
 
 
-
 void initializeRadio(){
   pinMode(12, OUTPUT);    //reset RN2483
   digitalWrite(12, LOW);
   delay(500);
   digitalWrite(12, HIGH);
-
   
   delay(100);             //wait for the RN2xx3's startup message
   mySerial.flush();
