@@ -25,7 +25,7 @@ Device measure enviroment temperature data on hearbeat event. This data can be r
 
 ## Hardware Connection
 <center>
-![WolkTTN-Connection_-_Small](/uploads/888f122810f2381fdc2e7040a95ef584/WolkTTN-Connection_-_Small.png)
+![wolkttn-connection - small](https://user-images.githubusercontent.com/10706360/46349777-46f75680-c653-11e8-8517-2629b2f7b8c1.png)
 </center>
 
 ## Firmware Deployment
