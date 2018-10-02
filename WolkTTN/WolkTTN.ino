@@ -16,8 +16,8 @@
 
 #define debugSerial Serial
 
-#define ABP                     //DEFINE CONNECTION MODE: ABP or OTAA
-#define HEARTBEAT 25000          //in ms
+#define OTAA                     //DEFINE CONNECTION MODE: ABP or OTAA
+#define HEARTBEAT 60000          //in ms
 #define BYTES_TO_SEND 3
 #define ONE_WIRE_BUS 2
 
