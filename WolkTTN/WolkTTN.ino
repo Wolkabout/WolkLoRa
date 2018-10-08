@@ -21,12 +21,12 @@
 #define ONE_WIRE_BUS 2
 
 #ifdef OTAA                      // Copy from TTN Console/Device Overview your AppEUI and AppKey for OTAA mode
-const char *appEui = "70B3D57ED00096A0";
-const char *appKey = "DB3CB2B8D77C8114C2247090E2C9AEAD";
+const char *appEui = "";
+const char *appKey = "";
 #else //ABP                      // Copy from TTN Console/Device Overview your DevAddr, NwkSKey and AppSKey for ABP mode
-const char *devAddr = "260114E1";
-const char *nwkSKey = "8B452ACA0135B180CFC18ADAE8E06B51";
-const char *appSKey = "93BC936B1B2B5E8A351B3F6D62B56ED4";
+const char *devAddr = "";
+const char *nwkSKey = "";
+const char *appSKey = "";
 #endif
 bool join_result = false;
 
