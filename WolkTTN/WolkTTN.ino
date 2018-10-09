@@ -1,6 +1,6 @@
 /*
  * Author: sstankovic
- * Date: 2018-03-06
+ * Date: 2018-09-10
  * Filename: WolkNode-TTN
  * Decription: Project core is based on https://github.com/jpmeijers/RN2483-Arduino-Library. 
  *             This program is meant to be used with an Arduino UNO, conencted to any RN2483 radio module and DS1820 temperature sensor.
@@ -8,7 +8,7 @@
  *
  *     Copyright 2018 WolkAbout Technology s.r.o.
  */
-#include <rn2xx3.h>
+#include <TheThingsNetwork.h>
 #include <SoftwareSerial.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
@@ -16,9 +16,10 @@
 
 #define debugSerial Serial
 
-#define OTAA                     //DEFINE CONNECTION MODE: ABP or OTAA
+#define OTAA                    //DEFINE CONNECTION MODE: ABP or OTAA
+#define freqPlan TTN_FP_EU868   //Freq plan
 #define HEARTBEAT 60000          //in ms
-#define BYTES_TO_SEND 3
+#define BYTES_TO_SEND 4
 #define ONE_WIRE_BUS 2
 
 #ifdef OTAA                      // Copy from TTN Console/Device Overview your AppEUI and AppKey for OTAA mode
@@ -32,7 +33,7 @@ const char *appSKey = "";
 bool join_result = false;
 
 SoftwareSerial mySerial(10, 11); // RX, TX
-rn2xx3 myLora(mySerial);
+TheThingsNetwork ttn(mySerial, debugSerial, freqPlan);
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 CayenneLPP lpp(30);
@@ -50,37 +51,32 @@ void setup(){
   delay(2000);
 }
 
+
 void loop(){
   setLed(HIGH);
-  debugSerial.print("\n\rRequesting temperatures...");
-  sensors.requestTemperatures();
-  debugSerial.print(" Temperature is: ");
-  float temperature = sensors.getTempCByIndex(0);
-  debugSerial.print(temperature);
-  debugSerial.print(" C \n\r");
-  int temperature_high = temperature;
-  int temperature_low = 100 * (temperature - temperature_high);
 
-  debugSerial.print(" Formating to CayenneLPP");
+  debugSerial.print(" Formating to CayenneLPP \n\r");
   lpp.reset();
-  lpp.addTemperature(1, temperature);
+  lpp.addTemperature(1, get_temperature());
 
-  debugSerial.print(" Sending payload to TTN ");  
-  join_result = myLora.tx(lpp.getBuffer());
+  debugSerial.print(" Sending payload to TTN ");
+  byte payload[BYTES_TO_SEND];
+  memcpy(payload, lpp.getBuffer(), BYTES_TO_SEND);
+  join_result = ttn.sendBytes(lpp.getBuffer(), lpp.getSize());
   if(!join_result){
-    debugSerial.print("Failed to transm   it to readings. \n\r Status is:");
+    debugSerial.print("Failed to transmit to readings. \n\r Status is:");
     debugSerial.print(join_result);
     
     while(!join_result){
       debugSerial.println("...trying to reconnect to TTN Gateway. \n\rDo you have TTN coverage?");
       delay(60000);              //delay a minute before retry
-      join_result = myLora.init();
+      join_result = join_ttn();
     }
   }
   debugSerial.print("Successfully");
   
   setLed(LOW);
-  myLora.sleep(HEARTBEAT);
+  ttn.sleep(HEARTBEAT);
   delay(HEARTBEAT);
 }
 
@@ -92,38 +88,46 @@ void initializeRadio(){
   digitalWrite(12, HIGH);
   
   delay(100);             //wait for the RN2xx3's startup message
-  mySerial.flush();
-
-  myLora.autobaud();     //Autobaud the rn2483 module to 9600. The default would otherwise be 57600.
-
-  String hweui = myLora.hweui();
-  while(hweui.length() != 16){
-    debugSerial.println("Communication with RN2xx3 unsuccessful. Power cycle the board.");
-    debugSerial.println(hweui);
-    delay(10000);
-    hweui = myLora.hweui();
-  }
-
-  debugSerial.println("When using OTAA, register this DevEUI: ");
-  debugSerial.println(myLora.hweui());
-  debugSerial.println("RN2xx3 firmware version:");
-  debugSerial.println(myLora.sysver());
 
   debugSerial.println("Trying to join TTN");
-  #ifdef OTAA
-    debugSerial.println("-- OTAA SELECTED --\n\r-- JOIN OTAA --");
-    join_result = myLora.initOTAA(appEui, appKey);
-  #else
-    debugSerial.println("-- ABP SELECTED --\n\r-- PERSONALIZE ABP --");
-    join_result = myLora.initABP(devAddr, appSKey, nwkSKey);
-  #endif
-
+  join_result = join_ttn();
   while(!join_result){
     debugSerial.println("Unable to join. Are your keys correct, and do you have TTN coverage?");
     delay(60000);       //delay a minute before retry
-    join_result = myLora.init();
+    join_result = join_ttn();
   }
   debugSerial.println("Successfully joined TTN");
+
+  debugSerial.println("Device Status is:");
+  ttn.showStatus();
+}
+
+bool join_ttn()
+{
+  bool result = false;
+
+#ifdef OTAA
+  debugSerial.println("-- OTAA SELECTED --\n\r-- JOIN OTAA --");
+  result = ttn.join(appEui, appKey);
+#else
+  debugSerial.println("-- ABP SELECTED --\n\r-- PERSONALIZE ABP --");
+  result = ttn.personalize(devAddr, nwkSKey, appSKey);
+#endif
+
+  return result;
+}
+
+float get_temperature()
+{
+  debugSerial.print("\n\rRequesting temperatures...");
+  sensors.requestTemperatures();
+
+  debugSerial.print(" Temperature is: ");
+  float temperature = sensors.getTempCByIndex(0);
+  debugSerial.print(temperature);
+  debugSerial.print(" C \n\r");
+
+  return temperature;
 }
 
 void initLed(){
