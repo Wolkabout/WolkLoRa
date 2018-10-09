@@ -10,9 +10,9 @@
  */
 #include <rn2xx3.h>
 #include <SoftwareSerial.h>
-#include <CayenneLPP.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <CayenneLPP.h>
 
 #define debugSerial Serial
 
@@ -35,8 +35,7 @@ SoftwareSerial mySerial(10, 11); // RX, TX
 rn2xx3 myLora(mySerial);
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
-
-CayenneLPP lpp(6);
+CayenneLPP lpp(30);
 
 
 void setup(){
@@ -66,10 +65,10 @@ void loop(){
   lpp.reset();
   lpp.addTemperature(1, temperature);
 
-  debugSerial.print(" Sending payload to TTN ");
+  debugSerial.print(" Sending payload to TTN ");  
   join_result = myLora.tx(lpp.getBuffer());
   if(!join_result){
-    debugSerial.print("Failed to transmit to readings. \n\r Status is:");
+    debugSerial.print("Failed to transm   it to readings. \n\r Status is:");
     debugSerial.print(join_result);
     
     while(!join_result){
