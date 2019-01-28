@@ -134,4 +134,3 @@ void initLed(){
 void setLed(bool state){
   digitalWrite(4, state);
 }
-
