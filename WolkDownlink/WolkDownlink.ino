@@ -51,9 +51,8 @@ void setup()
 {
   //output LED pin
   pinMode(4, OUTPUT);
-  pinMode(13, OUTPUT);
-  led_on();
-
+  led_off();
+  
   // Open serial communications and wait for port to open:
   Serial.begin(57600); //serial port to computer
   mySerial.begin(9600); //serial port to radio
@@ -63,8 +62,7 @@ void setup()
 
   //transmit a startup message
   myLora.tx("TTN Mapper on TTN Enschede node");
-
-  led_off();
+  
   delay(2000);
 }
 
@@ -117,8 +115,6 @@ void initialize_radio()
 // the loop routine runs over and over again forever:
 void loop()
 {
-  led_on();
-
   Serial.print("TXing");
   //myLora.txCnf("!"); //one byte, blocking function
 
@@ -142,11 +138,11 @@ void loop()
         
         if(received == "ON")
         {
-          digitalWrite(4, HIGH);  
+          led_on();  
         }
         else
         {
-          digitalWrite(4, LOW);
+          led_off();
         }
         
         break;
@@ -156,17 +152,16 @@ void loop()
         Serial.println("Unknown response from TX function");
       }
   }
-
-  led_off();
+  
   delay(600000);
 }
 
 void led_on()
 {
-  digitalWrite(13, 1);
+  digitalWrite(4, 1);
 }
 
 void led_off()
 {
-  digitalWrite(13, 0);
+  digitalWrite(4, 0);
 }
