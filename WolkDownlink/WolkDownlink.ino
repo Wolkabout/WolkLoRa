@@ -1,39 +1,3 @@
-/*
-   Author: Dennis Ruigrok and JP Meijers
-   Date: 2017-01-16
-
-   This program is meant to be used with an Arduino UNO or NANO, conencted to an RNxx3 radio module.
-   It will most likely also work on other compatible Arduino or Arduino compatible boards,
-   like The Things Uno, but might need some slight modifications.
-
-   Transmit a one byte packet via TTN, using confirmed messages,
-   waiting for an acknowledgement or a downlink message.
-
-   CHECK THE RULES BEFORE USING THIS PROGRAM!
-
-   CHANGE ADDRESS!
-   Change the device address, network (session) key, and app (session) key to the values
-   that are registered via the TTN dashboard.
-   The appropriate line is "myLora.initABP(XXX);" or "myLora.initOTAA(XXX);"
-   When using ABP, it is advised to enable "relax frame count".
-
-   Connect the RN2xx3 as follows:
-   RN2xx3 -- Arduino
-   Uart TX -- 10
-   Uart RX -- 11
-   Reset -- 12
-   Vcc -- 3.3V
-   Gnd -- Gnd
-
-   If you use an Arduino with a free hardware serial port, you can replace
-   the line "rn2xx3 myLora(mySerial);"
-   with     "rn2xx3 myLora(SerialX);"
-   where the parameter is the serial port the RN2xx3 is connected to.
-   Remember that the serial port should be initialised before calling initTTN().
-   For best performance the serial port should be set to 57600 baud, which is impossible with a software serial port.
-   If you use 57600 baud, you can remove the line "myLora.autobaud();".
-
-*/
 #include <rn2xx3.h>
 #include <SoftwareSerial.h>
 
@@ -46,7 +10,6 @@ const char *appKey = "";
 //giving the software serial as port to use
 rn2xx3 myLora(mySerial);
 
-// the setup routine runs once when you press reset:
 void setup()
 {
   //output LED pin
@@ -101,6 +64,8 @@ void initialize_radio()
   bool join_result = false;
 
   join_result = myLora.initOTAA(appEui, appKey);
+  //if you want ABP activation, use the following line and not the previous one
+  //join_result = myLora.initABP(String addr, String AppSKey, String NwkSKey)
 
   while (!join_result)
   {

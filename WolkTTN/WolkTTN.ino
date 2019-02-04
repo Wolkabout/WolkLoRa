@@ -15,20 +15,21 @@
 
 #define debugSerial Serial
 
-#define OTAA                     //DEFINE CONNECTION MODE: ABP or OTAA
+//#define OTAA                     //DEFINE CONNECTION MODE: ABP or OTAA
 #define HEARTBEAT 60000          //in ms
 #define BYTES_TO_SEND 3
 #define ONE_WIRE_BUS 2
 
 #ifdef OTAA                      // Copy from TTN Console/Device Overview your AppEUI and AppKey for OTAA mode
-const char *appEui = "";
-const char *appKey = "";
+const char *appEui = "70B3D57EE0016EA6";
+const char *appKey = "394A6533107C7221C300EA92574577FD";
 #else //ABP                      // Copy from TTN Console/Device Overview your DevAddr, NwkSKey and AppSKey for ABP mode
-const char *devAddr = "";
-const char *nwkSKey = "";
-const char *appSKey = "";
+const char *devAddr = "2601230B";
+const char *nwkSKey = "0051FF9A70FE7961617B4D2925322AB5";
+const char *appSKey = "F866EB04E121CD42A16FE82D98ED4701";
 #endif
 bool join_result = false;
+
 
 SoftwareSerial mySerial(10, 11); // RX, TX
 rn2xx3 myLora(mySerial);
@@ -76,7 +77,8 @@ void loop(){
       join_result = myLora.init();
     }
   }
-  debugSerial.print("Successfully");
+  debugSerial.print("Successfully with join_result of");
+  debugSerial.print(join_result);
   
   setLed(LOW);
   myLora.sleep(HEARTBEAT);
